@@ -1,10 +1,8 @@
-
 spring:
-  datasource:    
-    url: jdbc:postgresql://junction.proxy.rlwy.net:50959/railway
-    username: postgres
-    password: NKJtvUDIlRzxjPcvFXXGEIjOuRAmsWLa
-    driver-class-name: org.postgresql.Driver
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/Activo_DB}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:root}
   jpa:
     hibernate:
       ddl-auto: update
@@ -12,6 +10,5 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-#        format_sql: true
 server:
-  port: 8080
+  port: ${PORT:8080}
