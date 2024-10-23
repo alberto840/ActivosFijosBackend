@@ -1,9 +1,10 @@
 
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/Activo_DB
+  datasource:    
+    url: jdbc:postgresql://junction.proxy.rlwy.net:50959/railway
     username: postgres
-    password: root
+    password: NKJtvUDIlRzxjPcvFXXGEIjOuRAmsWLa
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update
