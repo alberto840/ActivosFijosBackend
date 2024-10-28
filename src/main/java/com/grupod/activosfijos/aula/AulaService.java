@@ -30,6 +30,7 @@ public class AulaService {
 
         AulaEntity aulaEntity = new AulaEntity();
         aulaEntity.setNombre(aulaDto.getNombre());
+        aulaEntity.setCodigoUbicacion(aulaDto.getCodigoUbicacion()); // Nuevo campo
         aulaEntity.setBloqueEntity(bloque);
 
         AulaEntity nuevaAula = aulaRepository.save(aulaEntity);
@@ -37,6 +38,7 @@ public class AulaService {
 
         return convertirAulaEntityADto(nuevaAula);
     }
+
 
     public List<AulaDto> obtenerTodasLasAulas() {
         logger.info("Obteniendo todas las aulas");
@@ -66,12 +68,14 @@ public class AulaService {
                 .orElseThrow(() -> new RuntimeException("Bloque no encontrado con ID: " + aulaDto.getIdBloque()));
 
         aulaEntity.setNombre(aulaDto.getNombre());
+        aulaEntity.setCodigoUbicacion(aulaDto.getCodigoUbicacion()); // Nuevo campo
         aulaEntity.setBloqueEntity(bloque);
 
         AulaEntity aulaActualizada = aulaRepository.save(aulaEntity);
 
         return convertirAulaEntityADto(aulaActualizada);
     }
+
 
     public void eliminarAula(Integer id) {
         logger.info("Eliminando aula con ID: {}", id);
@@ -87,7 +91,9 @@ public class AulaService {
         return new AulaDto(
                 aulaEntity.getIdAula(),
                 aulaEntity.getNombre(),
+                aulaEntity.getCodigoUbicacion(), // Nuevo campo
                 aulaEntity.getBloqueEntity().getIdBloque()
         );
     }
+
 }

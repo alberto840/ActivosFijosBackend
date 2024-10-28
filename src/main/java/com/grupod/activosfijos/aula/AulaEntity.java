@@ -20,6 +20,9 @@ public class AulaEntity implements Serializable {
     @Column(name = "nombre")
     private String nombre;
 
+    @Column(name = "codigo_ubicacion") // Nuevo atributo
+    private String codigoUbicacion;
+
     @JoinColumn(name = "bloque_id", referencedColumnName = "id_bloque")
     @ManyToOne(optional = false)
     private BloqueEntity bloqueEntity;
@@ -28,9 +31,10 @@ public class AulaEntity implements Serializable {
     public AulaEntity() {}
 
     // Constructor completo
-    public AulaEntity(Integer idAula, String nombre, BloqueEntity bloqueEntity) {
+    public AulaEntity(Integer idAula, String nombre, String codigoUbicacion, BloqueEntity bloqueEntity) {
         this.idAula = idAula;
         this.nombre = nombre;
+        this.codigoUbicacion = codigoUbicacion;
         this.bloqueEntity = bloqueEntity;
     }
 
@@ -49,6 +53,14 @@ public class AulaEntity implements Serializable {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public String getCodigoUbicacion() {
+        return codigoUbicacion;
+    }
+
+    public void setCodigoUbicacion(String codigoUbicacion) {
+        this.codigoUbicacion = codigoUbicacion;
     }
 
     public BloqueEntity getBloqueEntity() {
@@ -72,14 +84,11 @@ public class AulaEntity implements Serializable {
             return false;
         }
         AulaEntity other = (AulaEntity) object;
-        if ((this.idAula == null && other.idAula != null) || (this.idAula != null && !this.idAula.equals(other.idAula))) {
-            return false;
-        }
-        return true;
+        return (this.idAula != null || other.idAula == null) && (this.idAula == null || this.idAula.equals(other.idAula));
     }
 
     @Override
     public String toString() {
-        return "com.grupod.activosfijos.aula.AulaEntity[ idAula=" + idAula + " ]";
+        return "com.grupod.activosfijos.aula.AulaEntity[ idAula=" + idAula + ", codigoUbicacion=" + codigoUbicacion + " ]";
     }
 }

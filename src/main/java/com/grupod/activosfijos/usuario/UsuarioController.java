@@ -21,7 +21,7 @@ public class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
-    @PostMapping("/crear")
+    @PostMapping
     public ResponseEntity<ResponseDto<UsuarioDto>> crearUsuario(@RequestBody UsuarioDto usuarioDto) {
         logger.info("Solicitud de creación de usuario recibida: {}", usuarioDto.getCorreo());
         return usuarioService.crearUsuario(usuarioDto);
@@ -87,6 +87,4 @@ public class UsuarioController {
 
         return response;
     }
-
-
 }

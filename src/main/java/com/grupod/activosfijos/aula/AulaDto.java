@@ -8,15 +8,17 @@ public class AulaDto implements Serializable {
 
     private Integer idAula;
     private String nombre;
+    private String codigoUbicacion; // Nuevo atributo
     private Integer idBloque;  // Solo el ID del bloque
 
     // Constructor vacío
     public AulaDto() {}
 
     // Constructor completo
-    public AulaDto(Integer idAula, String nombre, Integer idBloque) {
+    public AulaDto(Integer idAula, String nombre, String codigoUbicacion, Integer idBloque) {
         this.idAula = idAula;
         this.nombre = nombre;
+        this.codigoUbicacion = codigoUbicacion;
         this.idBloque = idBloque;
     }
 
@@ -37,6 +39,14 @@ public class AulaDto implements Serializable {
         this.nombre = nombre;
     }
 
+    public String getCodigoUbicacion() {
+        return codigoUbicacion;
+    }
+
+    public void setCodigoUbicacion(String codigoUbicacion) {
+        this.codigoUbicacion = codigoUbicacion;
+    }
+
     public Integer getIdBloque() {
         return idBloque;
     }
@@ -50,6 +60,7 @@ public class AulaDto implements Serializable {
         return "AulaDto{" +
                 "idAula=" + idAula +
                 ", nombre='" + nombre + '\'' +
+                ", codigoUbicacion='" + codigoUbicacion + '\'' +
                 ", idBloque=" + idBloque +
                 '}';
     }

@@ -19,6 +19,7 @@ public class UsuarioEntity implements Serializable {
     @Column(name = "id_usuario")
     private Integer idUsuario;
 
+
     @Basic(optional = false)
     @Column(name = "nombre")
     private String nombre;
