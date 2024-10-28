@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -152,6 +153,29 @@ public class ActivoController {
     public ResponseEntity<ResponseDto<List<UbicacionDto>>> obtenerUbicacionesDeTodosLosActivos() {
         List<UbicacionDto> ubicaciones = activoService.obtenerUbicacionesDeTodosLosActivos();
         return ResponseEntity.ok(new ResponseDto<>(true, "Ubicaciones obtenidas exitosamente", ubicaciones));
+    }
+
+    @PostMapping("/cargar-masivo")
+    public ResponseEntity<ResponseDto<List<ActivoDto>>> cargarActivosMasivos(
+            @RequestParam("file") MultipartFile file,
+            @RequestHeader("Authorization") String token) {
+
+        String extractedToken = token.replace("Bearer ", "");
+        String username = jwtConfig.extractUsername(extractedToken);
+
+        if (username == null || !jwtConfig.validateToken(extractedToken, username)) {
+            logger.warn("Token inválido o usuario no autorizado para cargar activos masivamente");
+            return ResponseEntity.status(401)
+                    .body(new ResponseDto<>(false, "Token inválido o usuario no autorizado", null));
+        }
+
+        try {
+            List<ActivoDto> activosCargados = activoService.cargarActivosMasivos(file);
+            return ResponseEntity.ok(new ResponseDto<>(true, "Activos cargados exitosamente", activosCargados));
+        } catch (Exception e) {
+            logger.error("Error al cargar activos masivamente", e);
+            return ResponseEntity.status(500).body(new ResponseDto<>(false, "Error al cargar activos", null));
+        }
     }
 
 }

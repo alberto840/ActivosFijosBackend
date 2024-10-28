@@ -24,11 +24,21 @@ import com.grupod.activosfijos.provincia.ProvinciaRepository;
 import com.grupod.activosfijos.proyecto.ProyectoEntity;
 import com.grupod.activosfijos.sucursal.SucursalEntity;
 import com.grupod.activosfijos.sucursal.SucursalRepository;
+import com.opencsv.CSVReader;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -259,5 +269,60 @@ public class ActivoService {
                 activoEntity.getProyectoEntity() != null ? activoEntity.getProyectoEntity().getIdProyecto() : null,
                 activoEntity.getModeloEntity() != null ? activoEntity.getModeloEntity().getIdModelo() : null
         );
+    }
+
+    public List<ActivoDto> cargarActivosMasivos(MultipartFile file) throws Exception {
+        List<ActivoDto> activosCargados = new ArrayList<>();
+
+        String fileType = file.getContentType();
+        if ("text/csv".equalsIgnoreCase(fileType)) {
+            activosCargados = leerActivosDesdeCSV(file);
+        } else if ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equalsIgnoreCase(fileType)) {
+            activosCargados = leerActivosDesdeExcel(file);
+        } else {
+            throw new IllegalArgumentException("Formato de archivo no compatible");
+        }
+
+        List<ActivoEntity> activosEntity = activosCargados.stream()
+                .map(this::convertirDtoAEntidad)
+                .collect(Collectors.toList());
+        activoRepository.saveAll(activosEntity); // Guardar en la base de datos
+
+        return activosCargados;
+    }
+
+    private List<ActivoDto> leerActivosDesdeCSV(MultipartFile file) throws Exception {
+        List<ActivoDto> activos = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()));
+             CSVReader csvReader = new CSVReader(br)) {
+            String[] values;
+            csvReader.readNext(); // saltar encabezado
+            while ((values = csvReader.readNext()) != null) {
+                ActivoDto activo = new ActivoDto();
+                activo.setNombre(values[0]);
+                activo.setValorActual(new BigDecimal(values[1]));
+                activo.setValorInicial(new BigDecimal(values[2]));
+                // Asignar el resto de propiedades del CSV al ActivoDto
+                activos.add(activo);
+            }
+        }
+        return activos;
+    }
+
+    private List<ActivoDto> leerActivosDesdeExcel(MultipartFile file) throws Exception {
+        List<ActivoDto> activos = new ArrayList<>();
+        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+            Sheet sheet = workbook.getSheetAt(0);
+            for (Row row : sheet) {
+                if (row.getRowNum() == 0) continue; // Saltar encabezado
+                ActivoDto activo = new ActivoDto();
+                activo.setNombre(row.getCell(0).getStringCellValue());
+                activo.setValorActual(new BigDecimal(row.getCell(1).getNumericCellValue()));
+                activo.setValorInicial(new BigDecimal(row.getCell(2).getNumericCellValue()));
+                // Asignar el resto de propiedades desde el Excel al ActivoDto
+                activos.add(activo);
+            }
+        }
+        return activos;
     }
 }
