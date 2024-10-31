@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CustodioRepository extends JpaRepository<CustodioEntity, Integer> {
+    Optional<CustodioEntity> findByCi(String ci);
 }

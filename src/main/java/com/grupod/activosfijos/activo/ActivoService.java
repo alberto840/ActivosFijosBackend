@@ -1,29 +1,14 @@
 package com.grupod.activosfijos.activo;
 
-
-
 import com.grupod.activosfijos.aula.AulaEntity;
 import com.grupod.activosfijos.aula.AulaRepository;
 import com.grupod.activosfijos.bloque.BloqueEntity;
 import com.grupod.activosfijos.bloque.BloqueRepository;
 import com.grupod.activosfijos.categoria.CategoriaEntity;
 import com.grupod.activosfijos.custodio.CustodioEntity;
-import com.grupod.activosfijos.departamento.DepartamentoEntity;
-import com.grupod.activosfijos.departamento.DepartamentoRepository;
-import com.grupod.activosfijos.depreciacion.DepreciacionEntity;
-import com.grupod.activosfijos.direccion.DireccionEntity;
-import com.grupod.activosfijos.direccion.DireccionRepository;
-import com.grupod.activosfijos.estadoActivo.EstadoactivoEntity;
-import com.grupod.activosfijos.modelo.ModeloEntity;
-import com.grupod.activosfijos.municipio.MunicipioEntity;
-import com.grupod.activosfijos.municipio.MunicipioRepository;
-import com.grupod.activosfijos.pais.PaisEntity;
-import com.grupod.activosfijos.pais.PaisRepository;
-import com.grupod.activosfijos.provincia.ProvinciaEntity;
-import com.grupod.activosfijos.provincia.ProvinciaRepository;
+import com.grupod.activosfijos.custodio.CustodioRepository;
 import com.grupod.activosfijos.proyecto.ProyectoEntity;
-import com.grupod.activosfijos.sucursal.SucursalEntity;
-import com.grupod.activosfijos.sucursal.SucursalRepository;
+import com.grupod.activosfijos.proyecto.ProyectoRepository;
 import com.opencsv.CSVReader;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -38,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -50,41 +36,67 @@ public class ActivoService {
     private final ActivoRepository activoRepository;
     private final AulaRepository aulaRepository;
     private final BloqueRepository bloqueRepository;
-    private final DireccionRepository direccionRepository;
-    private final SucursalRepository sucursalRepository;
-    private final MunicipioRepository municipioRepository;
-    private final ProvinciaRepository provinciaRepository;
-    private final DepartamentoRepository departamentoRepository;
-    private final PaisRepository paisRepository;
+    private final CustodioRepository custodioRepository;
+    private final ProyectoRepository proyectoRepository;
 
     @Autowired
     public ActivoService(
             ActivoRepository activoRepository,
             AulaRepository aulaRepository,
             BloqueRepository bloqueRepository,
-            DireccionRepository direccionRepository,
-            SucursalRepository sucursalRepository,
-            MunicipioRepository municipioRepository,
-            ProvinciaRepository provinciaRepository,
-            DepartamentoRepository departamentoRepository,
-            PaisRepository paisRepository) {
+            CustodioRepository custodioRepository,
+            ProyectoRepository proyectoRepository) {
         this.activoRepository = activoRepository;
         this.aulaRepository = aulaRepository;
         this.bloqueRepository = bloqueRepository;
-        this.direccionRepository = direccionRepository;
-        this.sucursalRepository = sucursalRepository;
-        this.municipioRepository = municipioRepository;
-        this.provinciaRepository = provinciaRepository;
-        this.departamentoRepository = departamentoRepository;
-        this.paisRepository = paisRepository;
+        this.custodioRepository = custodioRepository;
+        this.proyectoRepository = proyectoRepository;
     }
 
     public ActivoDto crearActivo(ActivoDto activoDto) {
         logger.info("Creando nuevo activo: {}", activoDto.getNombre());
         ActivoEntity activoEntity = convertirDtoAEntidad(activoDto);
+
+        if (activoDto.getAulaId() != null) {
+            AulaEntity aula = aulaRepository.findById(activoDto.getAulaId())
+                    .orElseThrow(() -> new RuntimeException("Aula no encontrada con ID: " + activoDto.getAulaId()));
+            activoEntity.setAulaEntity(aula);
+        } else if (activoDto.getCodigoUbicacion() != null) {
+            AulaEntity aula = aulaRepository.findByCodigoUbicacion(activoDto.getCodigoUbicacion())
+                    .orElseThrow(() -> new RuntimeException("Aula no encontrada con código de ubicación: " + activoDto.getCodigoUbicacion()));
+            activoEntity.setAulaEntity(aula);
+        } else {
+            throw new IllegalArgumentException("Debe proporcionar un `aulaId` o un `codigoUbicacion`.");
+        }
+
+        if (activoDto.getCustodioId() != null) {
+            CustodioEntity custodio = custodioRepository.findById(activoDto.getCustodioId())
+                    .orElseThrow(() -> new RuntimeException("Custodio no encontrado con ID: " + activoDto.getCustodioId()));
+            activoEntity.setCustodioEntity(custodio);
+        } else if (activoDto.getCiCustodio() != null) {
+            CustodioEntity custodio = custodioRepository.findByCi(activoDto.getCiCustodio())
+                    .orElseThrow(() -> new RuntimeException("Custodio no encontrado con CI: " + activoDto.getCiCustodio()));
+            activoEntity.setCustodioEntity(custodio);
+        } else {
+            throw new IllegalArgumentException("Debe proporcionar un `custodioId` o un `ciCustodio`.");
+        }
+
+        if (activoDto.getProyectoId() != null) {
+            ProyectoEntity proyecto = proyectoRepository.findById(activoDto.getProyectoId())
+                    .orElseThrow(() -> new RuntimeException("Proyecto no encontrado con ID: " + activoDto.getProyectoId()));
+            activoEntity.setProyectoEntity(proyecto);
+        } else if (activoDto.getCodigoProyecto() != null) {
+            ProyectoEntity proyecto = proyectoRepository.findByCodigoProyecto(activoDto.getCodigoProyecto())
+                    .orElseThrow(() -> new RuntimeException("Proyecto no encontrado con código: " + activoDto.getCodigoProyecto()));
+            activoEntity.setProyectoEntity(proyecto);
+        } else {
+            throw new IllegalArgumentException("Debe proporcionar un `proyectoId` o un `codigoProyecto`.");
+        }
+
         ActivoEntity nuevoActivo = activoRepository.save(activoEntity);
         return convertirEntidadADto(nuevoActivo);
     }
+
 
     public List<ActivoDto> obtenerTodosLosActivos() {
         logger.info("Obteniendo todos los activos");
@@ -112,11 +124,11 @@ public class ActivoService {
         activoEntity.setValorInicial(activoDto.getValorInicial());
         activoEntity.setFechaRegistro(activoDto.getFechaRegistro());
         activoEntity.setDetalle(activoDto.getDetalle());
-        activoEntity.setEstado(activoDto.getEstado());
+        activoEntity.setEstado(activoDto.isEstado());
         activoEntity.setPrecio(activoDto.getPrecio());
         activoEntity.setComprobanteCompra(activoDto.getComprobanteCompra());
+        activoEntity.setEstadoActivo(activoDto.getEstadoActivo());
 
-        // Actualizar las relaciones con otras entidades si se proporcionan los IDs
         actualizarRelaciones(activoEntity, activoDto);
 
         ActivoEntity activoActualizado = activoRepository.save(activoEntity);
@@ -133,97 +145,31 @@ public class ActivoService {
         return true;
     }
 
-    public UbicacionDto obtenerUbicacionCompletaPorIdActivo(Integer idActivo) {
-        ActivoEntity activoEntity = activoRepository.findById(idActivo).orElse(null);
-        if (activoEntity == null) {
-            logger.warn("Activo con ID {} no encontrado", idActivo);
-            return null;
-        }
-
-        ActivoDto activoDto = convertirEntidadADto(activoEntity);
-
-        // Obtención de relaciones utilizando las entidades correctas y sus métodos
-        AulaEntity aula = aulaRepository.findById(activoDto.getIdAula()).orElse(null);
-        if (aula == null || aula.getBloqueEntity() == null) return null;
-
-        BloqueEntity bloque = aula.getBloqueEntity();
-        if (bloque.getDireccionEntity() == null || bloque.getSucursalEntity() == null) return null;
-
-        DireccionEntity direccion = bloque.getDireccionEntity();
-        SucursalEntity sucursal = bloque.getSucursalEntity();
-
-        MunicipioEntity municipio = sucursal.getMunicipioEntity();
-        if (municipio == null || municipio.getProvinciaId() == null) return null;
-
-        ProvinciaEntity provincia = municipio.getProvinciaId();
-        if (provincia.getDepartamentoId() == null) return null;
-
-        DepartamentoEntity departamento = provincia.getDepartamentoId();
-        PaisEntity pais = departamento.getPaisEntity();
-
-        return new UbicacionDto(
-                aula.getNombre(),
-                bloque.getNombre(),
-                direccion.getCalle(),
-                direccion.getDetalle(),
-                direccion.getZona(),
-                municipio.getNombre(),
-                provincia.getNombre(),
-                departamento.getNombre(),
-                pais != null ? pais.getNombre() : "N/A",
-                sucursal.getNombre()
-        );
-    }
-
     private void actualizarRelaciones(ActivoEntity activoEntity, ActivoDto activoDto) {
-        if (activoDto.getIdAula() != null) {
-            AulaEntity aula = aulaRepository.findById(activoDto.getIdAula()).orElse(null);
+        if (activoDto.getAulaId() != null) {
+            AulaEntity aula = aulaRepository.findById(activoDto.getAulaId()).orElse(null);
             activoEntity.setAulaEntity(aula);
         }
 
-        if (activoDto.getIdBloque() != null) {
-            BloqueEntity bloque = bloqueRepository.findById(activoDto.getIdBloque()).orElse(null);
-            activoEntity.setBloqueEntity(bloque);
-        }
-
-        if (activoDto.getIdCategoria() != null) {
+        if (activoDto.getCategoriaId() != null) {
             CategoriaEntity categoria = new CategoriaEntity();
-            categoria.setIdCategoria(activoDto.getIdCategoria());
+            categoria.setIdCategoria(activoDto.getCategoriaId());
             activoEntity.setCategoriaEntity(categoria);
         }
 
-        if (activoDto.getIdCustodio() != null) {
+        if (activoDto.getCustodioId() != null) {
             CustodioEntity custodio = new CustodioEntity();
-            custodio.setIdCustodio(activoDto.getIdCustodio());
+            custodio.setIdCustodio(activoDto.getCustodioId());
             activoEntity.setCustodioEntity(custodio);
         }
 
-        if (activoDto.getIdDepreciacion() != null) {
-            DepreciacionEntity depreciacion = new DepreciacionEntity();
-            depreciacion.setIdDepreciacion(activoDto.getIdDepreciacion());
-            activoEntity.setDepreciacionEntity(depreciacion);
-        }
-
-        if (activoDto.getIdEstadoactivo() != null) {
-            EstadoactivoEntity estadoactivo = new EstadoactivoEntity();
-            estadoactivo.setIdEstado(activoDto.getIdEstadoactivo());
-            activoEntity.setEstadoactivoEntity(estadoactivo);
-        }
-
-        if (activoDto.getIdProyecto() != null) {
+        if (activoDto.getProyectoId() != null) {
             ProyectoEntity proyecto = new ProyectoEntity();
-            proyecto.setIdProyecto(activoDto.getIdProyecto());
+            proyecto.setIdProyecto(activoDto.getProyectoId());
             activoEntity.setProyectoEntity(proyecto);
-        }
-
-        if (activoDto.getIdModelo() != null) {
-            ModeloEntity modelo = new ModeloEntity();
-            modelo.setIdModelo(activoDto.getIdModelo());
-            activoEntity.setModeloEntity(modelo);
         }
     }
 
-    // Conversión de Dto a Entidad y Entidad a Dto
     private ActivoEntity convertirDtoAEntidad(ActivoDto activoDto) {
         ActivoEntity activoEntity = new ActivoEntity();
         activoEntity.setNombre(activoDto.getNombre());
@@ -231,22 +177,14 @@ public class ActivoService {
         activoEntity.setValorInicial(activoDto.getValorInicial());
         activoEntity.setFechaRegistro(activoDto.getFechaRegistro());
         activoEntity.setDetalle(activoDto.getDetalle());
-        activoEntity.setEstado(activoDto.getEstado());
+        activoEntity.setEstado(activoDto.isEstado());
         activoEntity.setPrecio(activoDto.getPrecio());
         activoEntity.setComprobanteCompra(activoDto.getComprobanteCompra());
+        activoEntity.setEstadoActivo(activoDto.getEstadoActivo());
 
-        // Asignar las entidades relacionadas si los IDs no son nulos
         actualizarRelaciones(activoEntity, activoDto);
 
         return activoEntity;
-    }
-
-    public List<UbicacionDto> obtenerUbicacionesDeTodosLosActivos() {
-        List<ActivoEntity> activos = activoRepository.findAll();
-        return activos.stream()
-                .map(activo -> obtenerUbicacionCompletaPorIdActivo(activo.getIdActivo()))
-                .filter(ubicacion -> ubicacion != null)  // Filtrar activos sin ubicación
-                .collect(Collectors.toList());
     }
 
     private ActivoDto convertirEntidadADto(ActivoEntity activoEntity) {
@@ -260,14 +198,49 @@ public class ActivoService {
                 activoEntity.isEstado(),
                 activoEntity.getPrecio(),
                 activoEntity.getComprobanteCompra(),
+                activoEntity.getEstadoActivo(),
                 activoEntity.getAulaEntity() != null ? activoEntity.getAulaEntity().getIdAula() : null,
-                activoEntity.getBloqueEntity() != null ? activoEntity.getBloqueEntity().getIdBloque() : null,
                 activoEntity.getCategoriaEntity() != null ? activoEntity.getCategoriaEntity().getIdCategoria() : null,
                 activoEntity.getCustodioEntity() != null ? activoEntity.getCustodioEntity().getIdCustodio() : null,
-                activoEntity.getDepreciacionEntity() != null ? activoEntity.getDepreciacionEntity().getIdDepreciacion() : null,
-                activoEntity.getEstadoactivoEntity() != null ? activoEntity.getEstadoactivoEntity().getIdEstado() : null,
                 activoEntity.getProyectoEntity() != null ? activoEntity.getProyectoEntity().getIdProyecto() : null,
-                activoEntity.getModeloEntity() != null ? activoEntity.getModeloEntity().getIdModelo() : null
+                activoEntity.getAulaEntity() != null ? activoEntity.getAulaEntity().getCodigoUbicacion() : null,
+                activoEntity.getCustodioEntity() != null ? activoEntity.getCustodioEntity().getCi() : null,
+                activoEntity.getProyectoEntity() != null ? activoEntity.getProyectoEntity().getCodigoProyecto() : null
+        );
+    }
+
+    public List<UbicacionDto> obtenerUbicacionesDeTodosLosActivos() {
+        List<ActivoEntity> activos = activoRepository.findAll();
+        return activos.stream()
+                .map(activo -> obtenerUbicacionCompletaPorIdActivo(activo.getIdActivo()))
+                .filter(ubicacion -> ubicacion != null)
+                .collect(Collectors.toList());
+    }
+
+    public UbicacionDto obtenerUbicacionCompletaPorIdActivo(Integer idActivo) {
+        ActivoEntity activoEntity = activoRepository.findById(idActivo).orElse(null);
+        if (activoEntity == null) {
+            logger.warn("Activo con ID {} no encontrado", idActivo);
+            return null;
+        }
+
+        AulaEntity aula = activoEntity.getAulaEntity();
+        if (aula == null || aula.getBloqueEntity() == null) return null;
+
+        BloqueEntity bloque = aula.getBloqueEntity();
+        if (bloque.getDireccionEntity() == null || bloque.getSucursalEntity() == null) return null;
+
+        return new UbicacionDto(
+                aula.getNombre(),
+                bloque.getNombre(),
+                bloque.getDireccionEntity().getCalle(),
+                bloque.getDireccionEntity().getDetalle(),
+                bloque.getDireccionEntity().getZona(),
+                bloque.getSucursalEntity().getMunicipioEntity().getNombre(),
+                bloque.getSucursalEntity().getMunicipioEntity().getProvinciaId().getNombre(),
+                bloque.getSucursalEntity().getMunicipioEntity().getProvinciaId().getDepartamentoId().getNombre(),
+                bloque.getSucursalEntity().getMunicipioEntity().getProvinciaId().getDepartamentoId().getPaisEntity().getNombre(),
+                bloque.getSucursalEntity().getNombre()
         );
     }
 
@@ -286,7 +259,7 @@ public class ActivoService {
         List<ActivoEntity> activosEntity = activosCargados.stream()
                 .map(this::convertirDtoAEntidad)
                 .collect(Collectors.toList());
-        activoRepository.saveAll(activosEntity); // Guardar en la base de datos
+        activoRepository.saveAll(activosEntity);
 
         return activosCargados;
     }
@@ -296,13 +269,22 @@ public class ActivoService {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()));
              CSVReader csvReader = new CSVReader(br)) {
             String[] values;
-            csvReader.readNext(); // saltar encabezado
+            csvReader.readNext(); // Salta el encabezado
             while ((values = csvReader.readNext()) != null) {
                 ActivoDto activo = new ActivoDto();
                 activo.setNombre(values[0]);
                 activo.setValorActual(new BigDecimal(values[1]));
                 activo.setValorInicial(new BigDecimal(values[2]));
-                // Asignar el resto de propiedades del CSV al ActivoDto
+                activo.setFechaRegistro(new SimpleDateFormat("yyyy-MM-dd").parse(values[3]));
+                activo.setDetalle(values[4]);
+                activo.setEstado(Boolean.parseBoolean(values[5]));
+                activo.setPrecio(new BigDecimal(values[6]));
+                activo.setComprobanteCompra(values[7]);
+                activo.setEstadoActivo(values[8]);
+                activo.setAulaId(values[9] != null ? Integer.parseInt(values[9]) : null);
+                activo.setCategoriaId(values[10] != null ? Integer.parseInt(values[10]) : null);
+                activo.setCustodioId(values[11] != null ? Integer.parseInt(values[11]) : null);
+                activo.setProyectoId(values[12] != null ? Integer.parseInt(values[12]) : null);
                 activos.add(activo);
             }
         }
@@ -314,12 +296,21 @@ public class ActivoService {
         try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
             for (Row row : sheet) {
-                if (row.getRowNum() == 0) continue; // Saltar encabezado
+                if (row.getRowNum() == 0) continue; // Salta el encabezado
                 ActivoDto activo = new ActivoDto();
                 activo.setNombre(row.getCell(0).getStringCellValue());
                 activo.setValorActual(new BigDecimal(row.getCell(1).getNumericCellValue()));
                 activo.setValorInicial(new BigDecimal(row.getCell(2).getNumericCellValue()));
-                // Asignar el resto de propiedades desde el Excel al ActivoDto
+                activo.setFechaRegistro(row.getCell(3).getDateCellValue());
+                activo.setDetalle(row.getCell(4).getStringCellValue());
+                activo.setEstado(row.getCell(5).getBooleanCellValue());
+                activo.setPrecio(new BigDecimal(row.getCell(6).getNumericCellValue()));
+                activo.setComprobanteCompra(row.getCell(7).getStringCellValue());
+                activo.setEstadoActivo(row.getCell(8).getStringCellValue());
+                activo.setAulaId(row.getCell(9) != null ? (int) row.getCell(9).getNumericCellValue() : null);
+                activo.setCategoriaId(row.getCell(10) != null ? (int) row.getCell(10).getNumericCellValue() : null);
+                activo.setCustodioId(row.getCell(11) != null ? (int) row.getCell(11).getNumericCellValue() : null);
+                activo.setProyectoId(row.getCell(12) != null ? (int) row.getCell(12).getNumericCellValue() : null);
                 activos.add(activo);
             }
         }

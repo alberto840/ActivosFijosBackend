@@ -1,12 +1,9 @@
 package com.grupod.activosfijos.activo;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
-public class ActivoDto implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class ActivoDto {
 
     private Integer idActivo;
     private String nombre;
@@ -17,21 +14,20 @@ public class ActivoDto implements Serializable {
     private boolean estado;
     private BigDecimal precio;
     private String comprobanteCompra;
+    private String estadoActivo;
+    private Integer aulaId;
+    private Integer categoriaId;
+    private Integer custodioId;
+    private Integer proyectoId;
+    private String codigoUbicacion; // Código de ubicación del aula
+    private String ciCustodio;      // CI del custodio
+    private String codigoProyecto;  // Código del proyecto
 
-    // IDs de las entidades relacionadas
-    private Integer idAula;
-    private Integer idBloque;
-    private Integer idCategoria;
-    private Integer idCustodio;
-    private Integer idDepreciacion;
-    private Integer idEstadoactivo;
-    private Integer idProyecto;
-    private Integer idModelo;
-
-    public ActivoDto() {
-    }
-
-    public ActivoDto(Integer idActivo, String nombre, BigDecimal valorActual, BigDecimal valorInicial, Date fechaRegistro, String detalle, boolean estado, BigDecimal precio, String comprobanteCompra, Integer idAula, Integer idBloque, Integer idCategoria, Integer idCustodio, Integer idDepreciacion, Integer idEstadoactivo, Integer idProyecto, Integer idModelo) {
+    // Constructor con todos los parámetros
+    public ActivoDto(Integer idActivo, String nombre, BigDecimal valorActual, BigDecimal valorInicial, Date fechaRegistro,
+                     String detalle, boolean estado, BigDecimal precio, String comprobanteCompra, String estadoActivo,
+                     Integer aulaId, Integer categoriaId, Integer custodioId, Integer proyectoId,
+                     String codigoUbicacion, String ciCustodio, String codigoProyecto) {
         this.idActivo = idActivo;
         this.nombre = nombre;
         this.valorActual = valorActual;
@@ -41,17 +37,20 @@ public class ActivoDto implements Serializable {
         this.estado = estado;
         this.precio = precio;
         this.comprobanteCompra = comprobanteCompra;
-        this.idAula = idAula;
-        this.idBloque = idBloque;
-        this.idCategoria = idCategoria;
-        this.idCustodio = idCustodio;
-        this.idDepreciacion = idDepreciacion;
-        this.idEstadoactivo = idEstadoactivo;
-        this.idProyecto = idProyecto;
-        this.idModelo = idModelo;
+        this.estadoActivo = estadoActivo;
+        this.aulaId = aulaId;
+        this.categoriaId = categoriaId;
+        this.custodioId = custodioId;
+        this.proyectoId = proyectoId;
+        this.codigoUbicacion = codigoUbicacion;
+        this.ciCustodio = ciCustodio;
+        this.codigoProyecto = codigoProyecto;
     }
 
-    // Getters y setters
+    // Constructor vacío
+    public ActivoDto() {}
+
+    // Getters y Setters
     public Integer getIdActivo() {
         return idActivo;
     }
@@ -100,7 +99,7 @@ public class ActivoDto implements Serializable {
         this.detalle = detalle;
     }
 
-    public boolean getEstado() {
+    public boolean isEstado() {
         return estado;
     }
 
@@ -124,68 +123,68 @@ public class ActivoDto implements Serializable {
         this.comprobanteCompra = comprobanteCompra;
     }
 
-    public Integer getIdAula() {
-        return idAula;
+    public String getEstadoActivo() {
+        return estadoActivo;
     }
 
-    public void setIdAula(Integer idAula) {
-        this.idAula = idAula;
+    public void setEstadoActivo(String estadoActivo) {
+        this.estadoActivo = estadoActivo;
     }
 
-    public Integer getIdBloque() {
-        return idBloque;
+    public Integer getAulaId() {
+        return aulaId;
     }
 
-    public void setIdBloque(Integer idBloque) {
-        this.idBloque = idBloque;
+    public void setAulaId(Integer aulaId) {
+        this.aulaId = aulaId;
     }
 
-    public Integer getIdCategoria() {
-        return idCategoria;
+    public Integer getCategoriaId() {
+        return categoriaId;
     }
 
-    public void setIdCategoria(Integer idCategoria) {
-        this.idCategoria = idCategoria;
+    public void setCategoriaId(Integer categoriaId) {
+        this.categoriaId = categoriaId;
     }
 
-    public Integer getIdCustodio() {
-        return idCustodio;
+    public Integer getCustodioId() {
+        return custodioId;
     }
 
-    public void setIdCustodio(Integer idCustodio) {
-        this.idCustodio = idCustodio;
+    public void setCustodioId(Integer custodioId) {
+        this.custodioId = custodioId;
     }
 
-    public Integer getIdDepreciacion() {
-        return idDepreciacion;
+    public Integer getProyectoId() {
+        return proyectoId;
     }
 
-    public void setIdDepreciacion(Integer idDepreciacion) {
-        this.idDepreciacion = idDepreciacion;
+    public void setProyectoId(Integer proyectoId) {
+        this.proyectoId = proyectoId;
     }
 
-    public Integer getIdEstadoactivo() {
-        return idEstadoactivo;
+    public String getCodigoUbicacion() {
+        return codigoUbicacion;
     }
 
-    public void setIdEstadoactivo(Integer idEstadoactivo) {
-        this.idEstadoactivo = idEstadoactivo;
+    public void setCodigoUbicacion(String codigoUbicacion) {
+        this.codigoUbicacion = codigoUbicacion;
     }
 
-    public Integer getIdProyecto() {
-        return idProyecto;
+    public String getCiCustodio() {
+        return ciCustodio;
     }
 
-    public void setIdProyecto(Integer idProyecto) {
-        this.idProyecto = idProyecto;
+    public void setCiCustodio(String ciCustodio) {
+        this.ciCustodio = ciCustodio;
     }
 
-    public Integer getIdModelo() {
-        return idModelo;
+    public String getCodigoProyecto() {
+        return codigoProyecto;
     }
 
-    public void setIdModelo(Integer idModelo) {
-        this.idModelo = idModelo;
+    public void setCodigoProyecto(String codigoProyecto) {
+        this.codigoProyecto = codigoProyecto;
     }
 
     @Override
@@ -200,14 +199,14 @@ public class ActivoDto implements Serializable {
                 ", estado=" + estado +
                 ", precio=" + precio +
                 ", comprobanteCompra='" + comprobanteCompra + '\'' +
-                ", idAula=" + idAula +
-                ", idBloque=" + idBloque +
-                ", idCategoria=" + idCategoria +
-                ", idCustodio=" + idCustodio +
-                ", idDepreciacion=" + idDepreciacion +
-                ", idEstadoactivo=" + idEstadoactivo +
-                ", idProyecto=" + idProyecto +
-                ", idModelo=" + idModelo +
+                ", estadoActivo='" + estadoActivo + '\'' +
+                ", aulaId=" + aulaId +
+                ", categoriaId=" + categoriaId +
+                ", custodioId=" + custodioId +
+                ", proyectoId=" + proyectoId +
+                ", codigoUbicacion='" + codigoUbicacion + '\'' +
+                ", ciCustodio='" + ciCustodio + '\'' +
+                ", codigoProyecto='" + codigoProyecto + '\'' +
                 '}';
     }
 }

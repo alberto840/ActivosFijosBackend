@@ -1,9 +1,9 @@
 package com.grupod.activosfijos.proyecto;
 
-import java.io.Serializable;
-import java.util.Date;
 import com.grupod.activosfijos.area.AreaEntity;
 import jakarta.persistence.*;
+import java.io.Serializable;
+import java.util.Date;
 
 @Entity
 @Table(name = "proyecto")
@@ -16,6 +16,9 @@ public class ProyectoEntity implements Serializable {
 
     @Column(name = "nombre")
     private String nombre;
+
+    @Column(name = "codigo_proyecto") // Nuevo campo
+    private String codigoProyecto;
 
     @Column(name = "fecha_inicio")
     @Temporal(TemporalType.DATE)
@@ -32,9 +35,10 @@ public class ProyectoEntity implements Serializable {
     public ProyectoEntity() {
     }
 
-    public ProyectoEntity(Integer idProyecto, String nombre, Date fechaInicio, Date fechaFin, AreaEntity areaEntityId) {
+    public ProyectoEntity(Integer idProyecto, String nombre, String codigoProyecto, Date fechaInicio, Date fechaFin, AreaEntity areaEntityId) {
         this.idProyecto = idProyecto;
         this.nombre = nombre;
+        this.codigoProyecto = codigoProyecto;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
         this.areaEntityId = areaEntityId;
@@ -54,6 +58,14 @@ public class ProyectoEntity implements Serializable {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public String getCodigoProyecto() {
+        return codigoProyecto;
+    }
+
+    public void setCodigoProyecto(String codigoProyecto) {
+        this.codigoProyecto = codigoProyecto;
     }
 
     public Date getFechaInicio() {
@@ -93,10 +105,7 @@ public class ProyectoEntity implements Serializable {
             return false;
         }
         ProyectoEntity other = (ProyectoEntity) object;
-        if ((this.idProyecto == null && other.idProyecto != null) || (this.idProyecto != null && !this.idProyecto.equals(other.idProyecto))) {
-            return false;
-        }
-        return true;
+        return (this.idProyecto != null || other.idProyecto == null) && (this.idProyecto == null || this.idProyecto.equals(other.idProyecto));
     }
 
     @Override

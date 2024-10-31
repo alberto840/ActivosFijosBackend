@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,51 +23,50 @@ public class CategoriaService {
 
         CategoriaEntity categoriaEntity = new CategoriaEntity();
         categoriaEntity.setNombre(categoriaDto.getNombre());
+        categoriaEntity.setTiempoDeVida(categoriaDto.getTiempoDeVida());
+        categoriaEntity.setCoeficienteAnual(categoriaDto.getCoeficienteAnual());
 
         CategoriaEntity nuevaCategoria = categoriaRepository.save(categoriaEntity);
-        logger.info("Categoría creada con ID: {}", nuevaCategoria.getIdCategoria());
-
-        return new CategoriaDto(nuevaCategoria.getIdCategoria(), nuevaCategoria.getNombre());
+        return convertirEntidadADto(nuevaCategoria);
     }
 
     public List<CategoriaDto> obtenerTodasLasCategorias() {
         logger.info("Obteniendo todas las categorías");
-
-        List<CategoriaEntity> categorias = categoriaRepository.findAll();
-
-        return categorias.stream()
-                .map(categoria -> new CategoriaDto(categoria.getIdCategoria(), categoria.getNombre()))
+        return categoriaRepository.findAll().stream()
+                .map(this::convertirEntidadADto)
                 .collect(Collectors.toList());
     }
 
     public CategoriaDto obtenerCategoriaPorId(Integer id) {
-        logger.info("Obteniendo categoría con ID: {}", id);
         CategoriaEntity categoria = categoriaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
-
-        return new CategoriaDto(categoria.getIdCategoria(), categoria.getNombre());
+        return convertirEntidadADto(categoria);
     }
 
     public CategoriaDto actualizarCategoria(Integer id, CategoriaDto categoriaDto) {
-        logger.info("Actualizando categoría con ID: {}", id);
-
         CategoriaEntity categoriaEntity = categoriaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
 
         categoriaEntity.setNombre(categoriaDto.getNombre());
+        categoriaEntity.setTiempoDeVida(categoriaDto.getTiempoDeVida());
+        categoriaEntity.setCoeficienteAnual(categoriaDto.getCoeficienteAnual());
 
-        CategoriaEntity categoriaActualizada = categoriaRepository.save(categoriaEntity);
-
-        return new CategoriaDto(categoriaActualizada.getIdCategoria(), categoriaActualizada.getNombre());
+        return convertirEntidadADto(categoriaRepository.save(categoriaEntity));
     }
 
     public void eliminarCategoria(Integer id) {
-        logger.info("Eliminando categoría con ID: {}", id);
-
         if (!categoriaRepository.existsById(id)) {
             throw new RuntimeException("Categoría no encontrada");
         }
-
         categoriaRepository.deleteById(id);
+    }
+
+    private CategoriaDto convertirEntidadADto(CategoriaEntity categoriaEntity) {
+        return new CategoriaDto(
+                categoriaEntity.getIdCategoria(),
+                categoriaEntity.getNombre(),
+                categoriaEntity.getTiempoDeVida(),
+                categoriaEntity.getCoeficienteAnual()
+        );
     }
 }

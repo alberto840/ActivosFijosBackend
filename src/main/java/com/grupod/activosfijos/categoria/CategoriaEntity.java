@@ -11,24 +11,27 @@ public class CategoriaEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
     @Column(name = "id_categoria")
     private Integer idCategoria;
 
-    @Basic(optional = false)
-    @Column(name = "nombre")
+    @Column(name = "nombre", nullable = false)
     private String nombre;
 
-    // Constructor vacío
+    @Column(name = "tiempo_de_vida")
+    private Integer tiempoDeVida;
+
+    @Column(name = "coeficiente_anual")
+    private Double coeficienteAnual;
+
     public CategoriaEntity() {}
 
-    // Constructor con todos los parámetros
-    public CategoriaEntity(Integer idCategoria, String nombre) {
+    public CategoriaEntity(Integer idCategoria, String nombre, Integer tiempoDeVida, Double coeficienteAnual) {
         this.idCategoria = idCategoria;
         this.nombre = nombre;
+        this.tiempoDeVida = tiempoDeVida;
+        this.coeficienteAnual = coeficienteAnual;
     }
 
-    // Getters y Setters
     public Integer getIdCategoria() {
         return idCategoria;
     }
@@ -45,25 +48,29 @@ public class CategoriaEntity implements Serializable {
         this.nombre = nombre;
     }
 
-    @Override
-    public int hashCode() {
-        int hash = 0;
-        hash += (idCategoria != null ? idCategoria.hashCode() : 0);
-        return hash;
+    public Integer getTiempoDeVida() {
+        return tiempoDeVida;
     }
 
-    @Override
-    public boolean equals(Object object) {
-        if (!(object instanceof CategoriaEntity)) {
-            return false;
-        }
-        CategoriaEntity other = (CategoriaEntity) object;
-        return (this.idCategoria != null || other.idCategoria == null) &&
-                (this.idCategoria == null || this.idCategoria.equals(other.idCategoria));
+    public void setTiempoDeVida(Integer tiempoDeVida) {
+        this.tiempoDeVida = tiempoDeVida;
+    }
+
+    public Double getCoeficienteAnual() {
+        return coeficienteAnual;
+    }
+
+    public void setCoeficienteAnual(Double coeficienteAnual) {
+        this.coeficienteAnual = coeficienteAnual;
     }
 
     @Override
     public String toString() {
-        return "com.grupod.activosfijos.categoria.CategoriaEntity[ idCategoria=" + idCategoria + " ]";
+        return "CategoriaEntity{" +
+                "idCategoria=" + idCategoria +
+                ", nombre='" + nombre + '\'' +
+                ", tiempoDeVida=" + tiempoDeVida +
+                ", coeficienteAnual=" + coeficienteAnual +
+                '}';
     }
 }

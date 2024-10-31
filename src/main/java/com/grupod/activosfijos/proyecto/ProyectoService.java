@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,6 +35,7 @@ public class ProyectoService {
         proyectoEntity.setFechaInicio(proyectoDto.getFechaInicio());
         proyectoEntity.setFechaFin(proyectoDto.getFechaFin());
         proyectoEntity.setAreaEntityId(areaEntity);
+        proyectoEntity.setCodigoProyecto(proyectoDto.getCodigoProyecto());
 
         ProyectoEntity nuevoProyecto = proyectoRepository.save(proyectoEntity);
         logger.info("Proyecto creado con ID: {}", nuevoProyecto.getIdProyecto());
@@ -41,6 +43,7 @@ public class ProyectoService {
         return new ProyectoDto(
                 nuevoProyecto.getIdProyecto(),
                 nuevoProyecto.getNombre(),
+                nuevoProyecto.getCodigoProyecto(),
                 nuevoProyecto.getFechaInicio(),
                 nuevoProyecto.getFechaFin(),
                 nuevoProyecto.getAreaEntityId().getIdArea()
@@ -55,11 +58,35 @@ public class ProyectoService {
                 .map(proyecto -> new ProyectoDto(
                         proyecto.getIdProyecto(),
                         proyecto.getNombre(),
+                        proyecto.getCodigoProyecto(),
                         proyecto.getFechaInicio(),
                         proyecto.getFechaFin(),
                         proyecto.getAreaEntityId().getIdArea()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    public ProyectoDto obtenerProyectoPorIdOCodigo(Integer id, String codigoProyecto) {
+        logger.info("Obteniendo proyecto por ID: {} o código: {}", id, codigoProyecto);
+
+        Optional<ProyectoEntity> proyectoOpt;
+        if (id != null) {
+            proyectoOpt = proyectoRepository.findById(id);
+        } else {
+            proyectoOpt = proyectoRepository.findByCodigoProyecto(codigoProyecto);
+        }
+
+        ProyectoEntity proyecto = proyectoOpt
+                .orElseThrow(() -> new RuntimeException("Proyecto no encontrado con ID o código especificado"));
+
+        return new ProyectoDto(
+                proyecto.getIdProyecto(),
+                proyecto.getNombre(),
+                proyecto.getCodigoProyecto(),
+                proyecto.getFechaInicio(),
+                proyecto.getFechaFin(),
+                proyecto.getAreaEntityId().getIdArea()
+        );
     }
 
     public ProyectoDto obtenerProyectoPorId(Integer id) {
@@ -71,11 +98,13 @@ public class ProyectoService {
         return new ProyectoDto(
                 proyecto.getIdProyecto(),
                 proyecto.getNombre(),
+                proyecto.getCodigoProyecto(),
                 proyecto.getFechaInicio(),
                 proyecto.getFechaFin(),
                 proyecto.getAreaEntityId().getIdArea()
         );
     }
+
 
     public ProyectoDto actualizarProyecto(Integer id, ProyectoDto proyectoDto) {
         logger.info("Actualizando proyecto con ID: {}", id);
@@ -90,6 +119,7 @@ public class ProyectoService {
         proyectoEntity.setFechaInicio(proyectoDto.getFechaInicio());
         proyectoEntity.setFechaFin(proyectoDto.getFechaFin());
         proyectoEntity.setAreaEntityId(areaEntity);
+        proyectoEntity.setCodigoProyecto(proyectoDto.getCodigoProyecto());
 
         ProyectoEntity proyectoActualizado = proyectoRepository.save(proyectoEntity);
         logger.info("Proyecto actualizado con ID: {}", proyectoActualizado.getIdProyecto());
@@ -97,6 +127,7 @@ public class ProyectoService {
         return new ProyectoDto(
                 proyectoActualizado.getIdProyecto(),
                 proyectoActualizado.getNombre(),
+                proyectoActualizado.getCodigoProyecto(),
                 proyectoActualizado.getFechaInicio(),
                 proyectoActualizado.getFechaFin(),
                 proyectoActualizado.getAreaEntityId().getIdArea()

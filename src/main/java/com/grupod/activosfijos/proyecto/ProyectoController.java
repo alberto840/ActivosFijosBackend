@@ -61,6 +61,26 @@ public class ProyectoController {
         return ResponseEntity.ok(new ResponseDto<>(true, "Proyectos obtenidos exitosamente", proyectos));
     }
 
+    @GetMapping("/buscar")
+    public ResponseEntity<ResponseDto<ProyectoDto>> obtenerProyectoPorIdOCodigo(
+            @RequestParam(required = false) Integer id,
+            @RequestParam(required = false) String codigoProyecto,
+            @RequestHeader("Authorization") String token) {
+
+        String extractedToken = token.replace("Bearer ", "");
+        String username = jwtConfig.extractUsername(extractedToken);
+
+        if (username == null || !jwtConfig.validateToken(extractedToken, username)) {
+            logger.warn("Token inválido o usuario no autorizado para obtener proyecto");
+            return ResponseEntity.status(401)
+                    .body(new ResponseDto<>(false, "Token inválido o usuario no autorizado", null));
+        }
+
+        logger.info("Usuario autorizado para obtener proyecto con ID: {} o código: {}", id, codigoProyecto);
+        ProyectoDto proyecto = proyectoService.obtenerProyectoPorIdOCodigo(id, codigoProyecto);
+        return ResponseEntity.ok(new ResponseDto<>(true, "Proyecto obtenido exitosamente", proyecto));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ResponseDto<ProyectoDto>> obtenerProyectoPorId(
             @PathVariable Integer id,
@@ -79,6 +99,8 @@ public class ProyectoController {
         ProyectoDto proyecto = proyectoService.obtenerProyectoPorId(id);
         return ResponseEntity.ok(new ResponseDto<>(true, "Proyecto obtenido exitosamente", proyecto));
     }
+
+
 
     @PutMapping("/actualizar/{id}")
     public ResponseEntity<ResponseDto<ProyectoDto>> actualizarProyecto(

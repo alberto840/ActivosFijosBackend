@@ -9,17 +9,17 @@ public class ProyectoDto implements Serializable {
 
     private Integer idProyecto;
     private String nombre;
+    private String codigoProyecto; // Nuevo campo
     private Date fechaInicio;
     private Date fechaFin;
-    private Integer idArea; // Solo el ID del área
+    private Integer idArea;
 
-    // Constructor vacío
     public ProyectoDto() {}
 
-    // Constructor completo
-    public ProyectoDto(Integer idProyecto, String nombre, Date fechaInicio, Date fechaFin, Integer idArea) {
+    public ProyectoDto(Integer idProyecto, String nombre, String codigoProyecto, Date fechaInicio, Date fechaFin, Integer idArea) {
         this.idProyecto = idProyecto;
         this.nombre = nombre;
+        this.codigoProyecto = codigoProyecto;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
         this.idArea = idArea;
@@ -40,6 +40,14 @@ public class ProyectoDto implements Serializable {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public String getCodigoProyecto() {
+        return codigoProyecto;
+    }
+
+    public void setCodigoProyecto(String codigoProyecto) {
+        this.codigoProyecto = codigoProyecto;
     }
 
     public Date getFechaInicio() {
@@ -71,6 +79,7 @@ public class ProyectoDto implements Serializable {
         return "ProyectoDto{" +
                 "idProyecto=" + idProyecto +
                 ", nombre='" + nombre + '\'' +
+                ", codigoProyecto='" + codigoProyecto + '\'' +
                 ", fechaInicio=" + fechaInicio +
                 ", fechaFin=" + fechaFin +
                 ", idArea=" + idArea +

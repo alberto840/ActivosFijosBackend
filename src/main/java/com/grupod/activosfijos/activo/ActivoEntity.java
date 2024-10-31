@@ -1,12 +1,8 @@
 package com.grupod.activosfijos.activo;
 
 import com.grupod.activosfijos.aula.AulaEntity;
-import com.grupod.activosfijos.bloque.BloqueEntity;
 import com.grupod.activosfijos.categoria.CategoriaEntity;
 import com.grupod.activosfijos.custodio.CustodioEntity;
-import com.grupod.activosfijos.depreciacion.DepreciacionEntity;
-import com.grupod.activosfijos.estadoActivo.EstadoactivoEntity;
-import com.grupod.activosfijos.modelo.ModeloEntity; // Importación de ModeloEntity
 import com.grupod.activosfijos.proyecto.ProyectoEntity;
 import jakarta.persistence.*;
 import java.io.Serializable;
@@ -57,14 +53,14 @@ public class ActivoEntity implements Serializable {
     @Column(name = "comprobante_compra")
     private String comprobanteCompra;
 
+    @Basic(optional = false)
+    @Column(name = "estado_activo")
+    private String estadoActivo; // Ahora como atributo en la base de datos en lugar de relación
+
     // Relación ManyToOne con otras entidades
     @ManyToOne
     @JoinColumn(name = "aula_id", referencedColumnName = "id_aula")
     private AulaEntity aulaEntity;
-
-    @ManyToOne
-    @JoinColumn(name = "bloque_id", referencedColumnName = "id_bloque")
-    private BloqueEntity bloqueEntity;
 
     @ManyToOne
     @JoinColumn(name = "categoria_id", referencedColumnName = "id_categoria")
@@ -75,20 +71,8 @@ public class ActivoEntity implements Serializable {
     private CustodioEntity custodioEntity;
 
     @ManyToOne
-    @JoinColumn(name = "depreciacion_id", referencedColumnName = "id_depreciacion")
-    private DepreciacionEntity depreciacionEntity;
-
-    @ManyToOne
-    @JoinColumn(name = "estadoactivo_id", referencedColumnName = "id_estado")
-    private EstadoactivoEntity estadoactivoEntity;
-
-    @ManyToOne
     @JoinColumn(name = "proyecto_id", referencedColumnName = "id_proyecto")
     private ProyectoEntity proyectoEntity;
-
-    @ManyToOne
-    @JoinColumn(name = "modelo_id", referencedColumnName = "id_modelo") // Relación con ModeloEntity
-    private ModeloEntity modeloEntity;
 
     // Getters y Setters
     public Integer getIdActivo() {
@@ -163,20 +147,20 @@ public class ActivoEntity implements Serializable {
         this.comprobanteCompra = comprobanteCompra;
     }
 
+    public String getEstadoActivo() {
+        return estadoActivo;
+    }
+
+    public void setEstadoActivo(String estadoActivo) {
+        this.estadoActivo = estadoActivo;
+    }
+
     public AulaEntity getAulaEntity() {
         return aulaEntity;
     }
 
     public void setAulaEntity(AulaEntity aulaEntity) {
         this.aulaEntity = aulaEntity;
-    }
-
-    public BloqueEntity getBloqueEntity() {
-        return bloqueEntity;
-    }
-
-    public void setBloqueEntity(BloqueEntity bloqueEntity) {
-        this.bloqueEntity = bloqueEntity;
     }
 
     public CategoriaEntity getCategoriaEntity() {
@@ -195,35 +179,11 @@ public class ActivoEntity implements Serializable {
         this.custodioEntity = custodioEntity;
     }
 
-    public DepreciacionEntity getDepreciacionEntity() {
-        return depreciacionEntity;
-    }
-
-    public void setDepreciacionEntity(DepreciacionEntity depreciacionEntity) {
-        this.depreciacionEntity = depreciacionEntity;
-    }
-
-    public EstadoactivoEntity getEstadoactivoEntity() {
-        return estadoactivoEntity;
-    }
-
-    public void setEstadoactivoEntity(EstadoactivoEntity estadoactivoEntity) {
-        this.estadoactivoEntity = estadoactivoEntity;
-    }
-
     public ProyectoEntity getProyectoEntity() {
         return proyectoEntity;
     }
 
     public void setProyectoEntity(ProyectoEntity proyectoEntity) {
         this.proyectoEntity = proyectoEntity;
-    }
-
-    public ModeloEntity getModeloEntity() {
-        return modeloEntity;
-    }
-
-    public void setModeloEntity(ModeloEntity modeloEntity) {
-        this.modeloEntity = modeloEntity;
     }
 }
