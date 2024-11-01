@@ -281,15 +281,42 @@ public class ActivoService {
                 activo.setPrecio(new BigDecimal(values[6]));
                 activo.setComprobanteCompra(values[7]);
                 activo.setEstadoActivo(values[8]);
-                activo.setAulaId(values[9] != null ? Integer.parseInt(values[9]) : null);
-                activo.setCategoriaId(values[10] != null ? Integer.parseInt(values[10]) : null);
-                activo.setCustodioId(values[11] != null ? Integer.parseInt(values[11]) : null);
-                activo.setProyectoId(values[12] != null ? Integer.parseInt(values[12]) : null);
+                activo.setCategoriaId(Integer.parseInt(values[9]));
+
+                // Código de ubicación, CI de custodio, y código de proyecto
+                final String codigoUbicacion = values[10];
+                final String ciCustodio = values[11];
+                final String codigoProyecto = values[12];
+
+                // Cargar Aula por código
+                if (codigoUbicacion != null && !codigoUbicacion.isEmpty()) {
+                    AulaEntity aula = aulaRepository.findByCodigoUbicacion(codigoUbicacion)
+                            .orElseThrow(() -> new RuntimeException("Aula no encontrada con código: " + codigoUbicacion));
+                    activo.setAulaId(aula.getIdAula());
+                }
+
+                // Cargar Custodio por CI
+                if (ciCustodio != null && !ciCustodio.isEmpty()) {
+                    CustodioEntity custodio = custodioRepository.findByCi(ciCustodio)
+                            .orElseThrow(() -> new RuntimeException("Custodio no encontrado con CI: " + ciCustodio));
+                    activo.setCustodioId(custodio.getIdCustodio());
+                }
+
+                // Cargar Proyecto por código
+                if (codigoProyecto != null && !codigoProyecto.isEmpty()) {
+                    ProyectoEntity proyecto = proyectoRepository.findByCodigoProyecto(codigoProyecto)
+                            .orElseThrow(() -> new RuntimeException("Proyecto no encontrado con código: " + codigoProyecto));
+                    activo.setProyectoId(proyecto.getIdProyecto());
+                }
+
                 activos.add(activo);
             }
         }
         return activos;
     }
+
+
+
 
     private List<ActivoDto> leerActivosDesdeExcel(MultipartFile file) throws Exception {
         List<ActivoDto> activos = new ArrayList<>();
@@ -297,6 +324,7 @@ public class ActivoService {
             Sheet sheet = workbook.getSheetAt(0);
             for (Row row : sheet) {
                 if (row.getRowNum() == 0) continue; // Salta el encabezado
+
                 ActivoDto activo = new ActivoDto();
                 activo.setNombre(row.getCell(0).getStringCellValue());
                 activo.setValorActual(new BigDecimal(row.getCell(1).getNumericCellValue()));
@@ -307,13 +335,42 @@ public class ActivoService {
                 activo.setPrecio(new BigDecimal(row.getCell(6).getNumericCellValue()));
                 activo.setComprobanteCompra(row.getCell(7).getStringCellValue());
                 activo.setEstadoActivo(row.getCell(8).getStringCellValue());
-                activo.setAulaId(row.getCell(9) != null ? (int) row.getCell(9).getNumericCellValue() : null);
-                activo.setCategoriaId(row.getCell(10) != null ? (int) row.getCell(10).getNumericCellValue() : null);
-                activo.setCustodioId(row.getCell(11) != null ? (int) row.getCell(11).getNumericCellValue() : null);
-                activo.setProyectoId(row.getCell(12) != null ? (int) row.getCell(12).getNumericCellValue() : null);
+
+                final String codigoUbicacion = row.getCell(9) != null ? row.getCell(9).getStringCellValue() : null;
+                final String ciCustodio = row.getCell(10) != null ? row.getCell(10).getStringCellValue() : null;
+                final String codigoProyecto = row.getCell(11) != null ? row.getCell(11).getStringCellValue() : null;
+
+                // Para Aula
+                if (codigoUbicacion != null && !codigoUbicacion.isEmpty()) {
+                    logger.info("Buscando Aula con código de ubicación: " + codigoUbicacion);
+                    AulaEntity aula = aulaRepository.findByCodigoUbicacion(codigoUbicacion)
+                            .orElseThrow(() -> new RuntimeException("Aula no encontrada con código: " + codigoUbicacion));
+                    logger.info("Aula encontrada: " + aula.getNombre());
+                    activo.setAulaId(aula.getIdAula());
+                }
+
+                // Para Custodio
+                if (ciCustodio != null && !ciCustodio.isEmpty()) {
+                    logger.info("Buscando Custodio con CI: " + ciCustodio);
+                    CustodioEntity custodio = custodioRepository.findByCi(ciCustodio)
+                            .orElseThrow(() -> new RuntimeException("Custodio no encontrado con CI: " + ciCustodio));
+                    logger.info("Custodio encontrado: " + custodio.getNombre());
+                    activo.setCustodioId(custodio.getIdCustodio());
+                }
+
+                // Para Proyecto
+                if (codigoProyecto != null && !codigoProyecto.isEmpty()) {
+                    logger.info("Buscando Proyecto con código: " + codigoProyecto);
+                    ProyectoEntity proyecto = proyectoRepository.findByCodigoProyecto(codigoProyecto)
+                            .orElseThrow(() -> new RuntimeException("Proyecto no encontrado con código: " + codigoProyecto));
+                    logger.info("Proyecto encontrado: " + proyecto.getNombre());
+                    activo.setProyectoId(proyecto.getIdProyecto());
+                }
+
                 activos.add(activo);
             }
         }
         return activos;
     }
+
 }
