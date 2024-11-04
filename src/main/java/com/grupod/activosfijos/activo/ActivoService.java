@@ -7,6 +7,8 @@ import com.grupod.activosfijos.bloque.BloqueRepository;
 import com.grupod.activosfijos.categoria.CategoriaEntity;
 import com.grupod.activosfijos.custodio.CustodioEntity;
 import com.grupod.activosfijos.custodio.CustodioRepository;
+import com.grupod.activosfijos.modelo.ModeloEntity;
+import com.grupod.activosfijos.modelo.ModeloRepository;
 import com.grupod.activosfijos.proyecto.ProyectoEntity;
 import com.grupod.activosfijos.proyecto.ProyectoRepository;
 import com.opencsv.CSVReader;
@@ -14,6 +16,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +41,7 @@ public class ActivoService {
     private final BloqueRepository bloqueRepository;
     private final CustodioRepository custodioRepository;
     private final ProyectoRepository proyectoRepository;
+    private final ModeloRepository modeloRepository;
 
     @Autowired
     public ActivoService(
@@ -45,17 +49,28 @@ public class ActivoService {
             AulaRepository aulaRepository,
             BloqueRepository bloqueRepository,
             CustodioRepository custodioRepository,
-            ProyectoRepository proyectoRepository) {
+            ProyectoRepository proyectoRepository,
+            ModeloRepository modeloRepository) {
         this.activoRepository = activoRepository;
         this.aulaRepository = aulaRepository;
         this.bloqueRepository = bloqueRepository;
         this.custodioRepository = custodioRepository;
         this.proyectoRepository = proyectoRepository;
+        this.modeloRepository = modeloRepository;
     }
 
     public ActivoDto crearActivo(ActivoDto activoDto) {
         logger.info("Creando nuevo activo: {}", activoDto.getNombre());
         ActivoEntity activoEntity = convertirDtoAEntidad(activoDto);
+
+        // Verificación para idModelo, si es null no se realiza ninguna acción
+        if (activoDto.getIdModelo() != null) {
+            ModeloEntity modelo = modeloRepository.findById(activoDto.getIdModelo())
+                    .orElseThrow(() -> new RuntimeException("Modelo no encontrado con ID: " + activoDto.getIdModelo()));
+            activoEntity.setModeloEntity(modelo);
+        } else {
+            logger.info("idModelo es nulo, no se asignará ningún modelo al activo");
+        }
 
         if (activoDto.getAulaId() != null) {
             AulaEntity aula = aulaRepository.findById(activoDto.getAulaId())
@@ -168,6 +183,13 @@ public class ActivoService {
             proyecto.setIdProyecto(activoDto.getProyectoId());
             activoEntity.setProyectoEntity(proyecto);
         }
+
+        if (activoDto.getIdModelo() != null) {
+            ModeloEntity modelo = modeloRepository.findById(activoDto.getIdModelo()).orElse(null);
+            activoEntity.setModeloEntity(modelo);
+        } else {
+            activoEntity.setModeloEntity(null);
+        }
     }
 
     private ActivoEntity convertirDtoAEntidad(ActivoDto activoDto) {
@@ -203,6 +225,7 @@ public class ActivoService {
                 activoEntity.getCategoriaEntity() != null ? activoEntity.getCategoriaEntity().getIdCategoria() : null,
                 activoEntity.getCustodioEntity() != null ? activoEntity.getCustodioEntity().getIdCustodio() : null,
                 activoEntity.getProyectoEntity() != null ? activoEntity.getProyectoEntity().getIdProyecto() : null,
+                activoEntity.getModeloEntity() != null ? activoEntity.getModeloEntity().getIdModelo() : null,
                 activoEntity.getAulaEntity() != null ? activoEntity.getAulaEntity().getCodigoUbicacion() : null,
                 activoEntity.getCustodioEntity() != null ? activoEntity.getCustodioEntity().getCi() : null,
                 activoEntity.getProyectoEntity() != null ? activoEntity.getProyectoEntity().getCodigoProyecto() : null
@@ -283,30 +306,33 @@ public class ActivoService {
                 activo.setEstadoActivo(values[8]);
                 activo.setCategoriaId(Integer.parseInt(values[9]));
 
-                // Código de ubicación, CI de custodio, y código de proyecto
                 final String codigoUbicacion = values[10];
                 final String ciCustodio = values[11];
                 final String codigoProyecto = values[12];
+                final Integer idModelo = values[13] != null && !values[13].isEmpty() ? Integer.parseInt(values[13]) : null;
 
-                // Cargar Aula por código
                 if (codigoUbicacion != null && !codigoUbicacion.isEmpty()) {
                     AulaEntity aula = aulaRepository.findByCodigoUbicacion(codigoUbicacion)
                             .orElseThrow(() -> new RuntimeException("Aula no encontrada con código: " + codigoUbicacion));
                     activo.setAulaId(aula.getIdAula());
                 }
 
-                // Cargar Custodio por CI
                 if (ciCustodio != null && !ciCustodio.isEmpty()) {
                     CustodioEntity custodio = custodioRepository.findByCi(ciCustodio)
                             .orElseThrow(() -> new RuntimeException("Custodio no encontrado con CI: " + ciCustodio));
                     activo.setCustodioId(custodio.getIdCustodio());
                 }
 
-                // Cargar Proyecto por código
                 if (codigoProyecto != null && !codigoProyecto.isEmpty()) {
                     ProyectoEntity proyecto = proyectoRepository.findByCodigoProyecto(codigoProyecto)
                             .orElseThrow(() -> new RuntimeException("Proyecto no encontrado con código: " + codigoProyecto));
                     activo.setProyectoId(proyecto.getIdProyecto());
+                }
+
+                if (idModelo != null) {
+                    ModeloEntity modelo = modeloRepository.findById(idModelo)
+                            .orElseThrow(() -> new RuntimeException("Modelo no encontrado con ID: " + idModelo));
+                    activo.setIdModelo(modelo.getIdModelo());
                 }
 
                 activos.add(activo);
@@ -314,9 +340,6 @@ public class ActivoService {
         }
         return activos;
     }
-
-
-
 
     private List<ActivoDto> leerActivosDesdeExcel(MultipartFile file) throws Exception {
         List<ActivoDto> activos = new ArrayList<>();
@@ -339,32 +362,30 @@ public class ActivoService {
                 final String codigoUbicacion = row.getCell(9) != null ? row.getCell(9).getStringCellValue() : null;
                 final String ciCustodio = row.getCell(10) != null ? row.getCell(10).getStringCellValue() : null;
                 final String codigoProyecto = row.getCell(11) != null ? row.getCell(11).getStringCellValue() : null;
+                final Integer idModelo = row.getCell(12) != null ? (int) row.getCell(12).getNumericCellValue() : null;
 
-                // Para Aula
                 if (codigoUbicacion != null && !codigoUbicacion.isEmpty()) {
-                    logger.info("Buscando Aula con código de ubicación: " + codigoUbicacion);
                     AulaEntity aula = aulaRepository.findByCodigoUbicacion(codigoUbicacion)
                             .orElseThrow(() -> new RuntimeException("Aula no encontrada con código: " + codigoUbicacion));
-                    logger.info("Aula encontrada: " + aula.getNombre());
                     activo.setAulaId(aula.getIdAula());
                 }
 
-                // Para Custodio
                 if (ciCustodio != null && !ciCustodio.isEmpty()) {
-                    logger.info("Buscando Custodio con CI: " + ciCustodio);
                     CustodioEntity custodio = custodioRepository.findByCi(ciCustodio)
                             .orElseThrow(() -> new RuntimeException("Custodio no encontrado con CI: " + ciCustodio));
-                    logger.info("Custodio encontrado: " + custodio.getNombre());
                     activo.setCustodioId(custodio.getIdCustodio());
                 }
 
-                // Para Proyecto
                 if (codigoProyecto != null && !codigoProyecto.isEmpty()) {
-                    logger.info("Buscando Proyecto con código: " + codigoProyecto);
                     ProyectoEntity proyecto = proyectoRepository.findByCodigoProyecto(codigoProyecto)
                             .orElseThrow(() -> new RuntimeException("Proyecto no encontrado con código: " + codigoProyecto));
-                    logger.info("Proyecto encontrado: " + proyecto.getNombre());
                     activo.setProyectoId(proyecto.getIdProyecto());
+                }
+
+                if (idModelo != null) {
+                    ModeloEntity modelo = modeloRepository.findById(idModelo)
+                            .orElseThrow(() -> new RuntimeException("Modelo no encontrado con ID: " + idModelo));
+                    activo.setIdModelo(modelo.getIdModelo());
                 }
 
                 activos.add(activo);

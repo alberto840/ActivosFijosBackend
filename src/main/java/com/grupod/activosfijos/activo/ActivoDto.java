@@ -19,14 +19,18 @@ public class ActivoDto {
     private Integer categoriaId;
     private Integer custodioId;
     private Integer proyectoId;
-    private String codigoUbicacion; // Código de ubicación del aula
-    private String ciCustodio;      // CI del custodio
-    private String codigoProyecto;  // Código del proyecto
+    private Integer idModelo;
+    private String codigoUbicacion;
+    private String ciCustodio;
+    private String codigoProyecto;
 
-    // Constructor con todos los parámetros
+    // Constructor vacío (agregar este)
+    public ActivoDto() {}
+
+    // Constructor completo
     public ActivoDto(Integer idActivo, String nombre, BigDecimal valorActual, BigDecimal valorInicial, Date fechaRegistro,
                      String detalle, boolean estado, BigDecimal precio, String comprobanteCompra, String estadoActivo,
-                     Integer aulaId, Integer categoriaId, Integer custodioId, Integer proyectoId,
+                     Integer aulaId, Integer categoriaId, Integer custodioId, Integer proyectoId, Integer idModelo,
                      String codigoUbicacion, String ciCustodio, String codigoProyecto) {
         this.idActivo = idActivo;
         this.nombre = nombre;
@@ -42,15 +46,12 @@ public class ActivoDto {
         this.categoriaId = categoriaId;
         this.custodioId = custodioId;
         this.proyectoId = proyectoId;
+        this.idModelo = idModelo;
         this.codigoUbicacion = codigoUbicacion;
         this.ciCustodio = ciCustodio;
         this.codigoProyecto = codigoProyecto;
     }
 
-    // Constructor vacío
-    public ActivoDto() {}
-
-    // Getters y Setters
     public Integer getIdActivo() {
         return idActivo;
     }
@@ -163,6 +164,14 @@ public class ActivoDto {
         this.proyectoId = proyectoId;
     }
 
+    public Integer getIdModelo() {
+        return idModelo;
+    }
+
+    public void setIdModelo(Integer idModelo) {
+        this.idModelo = idModelo;
+    }
+
     public String getCodigoUbicacion() {
         return codigoUbicacion;
     }
@@ -204,6 +213,7 @@ public class ActivoDto {
                 ", categoriaId=" + categoriaId +
                 ", custodioId=" + custodioId +
                 ", proyectoId=" + proyectoId +
+                ", idModelo=" + idModelo +
                 ", codigoUbicacion='" + codigoUbicacion + '\'' +
                 ", ciCustodio='" + ciCustodio + '\'' +
                 ", codigoProyecto='" + codigoProyecto + '\'' +
