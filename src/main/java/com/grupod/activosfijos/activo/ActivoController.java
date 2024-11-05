@@ -178,4 +178,25 @@ public class ActivoController {
         }
     }
 
+
+    @GetMapping("/proyecto/{proyectoId}")
+    public ResponseEntity<ResponseDto<List<ActivoDto>>> obtenerActivosPorProyectoId(
+            @PathVariable Integer proyectoId,
+            @RequestHeader("Authorization") String token) {
+
+        String extractedToken = token.replace("Bearer ", "");
+        String username = jwtConfig.extractUsername(extractedToken);
+
+        if (username == null || !jwtConfig.validateToken(extractedToken, username)) {
+            logger.warn("Token inválido o usuario no autorizado para obtener activos por proyecto");
+            return ResponseEntity.status(401)
+                    .body(new ResponseDto<>(false, "Token inválido o usuario no autorizado", null));
+        }
+
+        logger.info("Usuario autorizado para obtener activos por proyecto con ID: {}", proyectoId);
+        List<ActivoDto> activos = activoService.obtenerActivosPorProyectoId(proyectoId);
+        return ResponseEntity.ok(new ResponseDto<>(true, "Activos obtenidos exitosamente", activos));
+    }
+
+
 }

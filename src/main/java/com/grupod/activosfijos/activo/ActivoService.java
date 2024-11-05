@@ -267,6 +267,12 @@ public class ActivoService {
         );
     }
 
+    public List<ActivoDto> obtenerActivosPorProyectoId(Integer proyectoId) {
+        List<ActivoEntity> activos = activoRepository.findByProyectoEntity_IdProyecto(proyectoId);
+        return activos.stream().map(this::convertirEntidadADto).collect(Collectors.toList());
+    }
+
+
     public List<ActivoDto> cargarActivosMasivos(MultipartFile file) throws Exception {
         List<ActivoDto> activosCargados = new ArrayList<>();
 
