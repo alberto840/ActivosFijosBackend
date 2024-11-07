@@ -141,6 +141,15 @@ public class HistorialACtivosService {
         }
     }
 
+    public List<HistorialActivosDto> obtenerHistorialesPorActivo(Integer idActivo) {
+        logger.info("Obteniendo historiales para el activo con ID: {}", idActivo);
+        List<HistorialActivosEntity> historiales = historialActivosRepository.findByActivoEntityIdActivo(idActivo);
+        return historiales.stream()
+                .map(this::convertirEntidadADto)
+                .collect(Collectors.toList());
+    }
+
+
     private HistorialActivosDto convertirEntidadADto(HistorialActivosEntity historialEntity) {
         return new HistorialActivosDto(
                 historialEntity.getIdHistorial(),

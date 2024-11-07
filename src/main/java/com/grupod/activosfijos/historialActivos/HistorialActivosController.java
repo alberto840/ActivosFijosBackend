@@ -119,4 +119,24 @@ public class HistorialActivosController {
         historialService.eliminarHistorial(id);
         return ResponseEntity.ok(new ResponseDto<>(true, "Historial eliminado exitosamente", null));
     }
+
+    @GetMapping("/porActivo/{idActivo}")
+    public ResponseEntity<ResponseDto<List<HistorialActivosDto>>> obtenerHistorialesPorActivo(
+            @PathVariable Integer idActivo,
+            @RequestHeader("Authorization") String token) {
+
+        String extractedToken = token.replace("Bearer ", "");
+        String username = jwtConfig.extractUsername(extractedToken);
+
+        if (username == null || !jwtConfig.validateToken(extractedToken, username)) {
+            logger.warn("Token inválido o usuario no autorizado para obtener historiales por activo");
+            return ResponseEntity.status(401)
+                    .body(new ResponseDto<>(false, "Token inválido o usuario no autorizado", null));
+        }
+
+        logger.info("Usuario autorizado para obtener historiales por activo con ID: {}", idActivo);
+        List<HistorialActivosDto> historiales = historialService.obtenerHistorialesPorActivo(idActivo);
+        return ResponseEntity.ok(new ResponseDto<>(true, "Historiales obtenidos exitosamente", historiales));
+    }
+
 }
