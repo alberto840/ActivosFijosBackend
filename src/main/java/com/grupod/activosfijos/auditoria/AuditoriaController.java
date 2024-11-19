@@ -40,4 +40,11 @@ public class AuditoriaController {
         List<AuditoriaEntity> registros = auditoriaService.obtenerPorAccion(accion);
         return ResponseEntity.ok(registros);
     }
+
+    @GetMapping("/todos")
+    public ResponseEntity<List<AuditoriaEntity>> obtenerTodos() {
+        List<AuditoriaEntity> registros = auditoriaService.obtenerTodos();
+        return ResponseEntity.ok(registros);
+    }
+
 }

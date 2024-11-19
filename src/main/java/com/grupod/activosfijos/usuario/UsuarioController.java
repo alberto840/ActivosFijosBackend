@@ -87,4 +87,13 @@ public class UsuarioController {
 
         return response;
     }
+
+    @PutMapping("/{id}/cambiar-password")
+    public ResponseEntity<ResponseDto<String>> cambiarPassword(
+            @PathVariable Integer id,
+            @RequestBody CambiarPasswordRequestDto cambiarPasswordRequest
+    ) {
+        return usuarioService.cambiarPassword(id, cambiarPasswordRequest.getCurrentPassword(), cambiarPasswordRequest.getNewPassword());
+    }
+
 }

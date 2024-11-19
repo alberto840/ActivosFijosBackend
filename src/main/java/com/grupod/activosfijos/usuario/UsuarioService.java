@@ -239,4 +239,33 @@ public class UsuarioService {
                 new ResponseDto<>(true, "Usuario eliminado con éxito", null)
         );
     }
+
+    public ResponseEntity<ResponseDto<String>> cambiarPassword(Integer id, String currentPassword, String newPassword) {
+        // Buscar el usuario por ID
+        Optional<UsuarioEntity> usuarioOpt = usuarioRepository.findById(id);
+        if (usuarioOpt.isEmpty()) {
+            logger.warn("Usuario con ID {} no encontrado", id);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseDto<>(false, "Usuario no encontrado", null)
+            );
+        }
+        UsuarioEntity usuario = usuarioOpt.get();
+        // Verificar la contraseña actual
+        if (!BCrypt.checkpw(currentPassword, usuario.getPassword())) {
+            logger.warn("Contraseña actual incorrecta para el usuario con ID {}", id);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    new ResponseDto<>(false, "Contraseña actual incorrecta", null)
+            );
+        }
+        // Encriptar la nueva contraseña y actualizar el usuario
+        String encodedNewPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt());
+        usuario.setPassword(encodedNewPassword);
+        usuarioRepository.save(usuario);
+
+        logger.info("Contraseña actualizada para el usuario con ID {}", id);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseDto<>(true, "Contraseña actualizada con éxito", null)
+        );
+    }
+
 }

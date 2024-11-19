@@ -32,4 +32,9 @@ public class AuditoriaServices {
     public List<AuditoriaEntity> obtenerPorAccion(String accion) {
         return auditoriaRepository.findByAccion(accion);
     }
+
+    public List<AuditoriaEntity> obtenerTodos() {
+        return auditoriaRepository.findAll();
+    }
+
 }
